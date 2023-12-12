@@ -1,72 +1,27 @@
-# Source: aerospike/templates/configmap.yaml
+# Source: airflow/charts/redis/templates/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: aerospike
+  name: airflow-redis
   labels:
-    app: aerospike
-    chart: aerospike-0.3.5
-    release: aerospike
+    app: redis
+    chart: redis-10.5.7
     heritage: Helm
+    release: airflow
 data:
-  aerospike.conf: |
-    # aerospike configuration
-        #default config file
-    service {
-        user root
-        group root
-        paxos-protocol v5
-        paxos-single-replica-limit 1
-        pidfile /var/run/aerospike/asd.pid
-        service-threads 4
-        transaction-queues 4
-        transaction-threads-per-queue 4
-        proto-fd-max 15000
-    }
-    
-    logging {
-        file /var/log/aerospike/aerospike.log {
-            context any info
-        }
-    
-        console {
-            context any info
-        }
-    }
-    
-    network {
-        service {
-            address any
-            port 3000
-        }
-    
-        heartbeat {
-            address any
-            interval 150
-            
-        mesh-seed-address-port aerospike-0.aerospike 3002
-            mode mesh
-            port 3002
-            timeout 20
-            protocol v3
-        }
-    
-        fabric {
-            port 3001
-        }
-    
-        info {
-            port 3003
-        }
-    }
-    
-    namespace test {
-        replication-factor 2
-        memory-size 1G
-        default-ttl 5d
-        storage-engine device {
-            file /opt/aerospike/data/test.dat
-            filesize 4G
-        }
-    }
+  redis.conf: |-
+    # User-supplied configuration:
+    # Enable AOF https://redis.io/topics/persistence#append-only-file
+    appendonly yes
+    # Disable RDB persistence, AOF persistence already enabled.
+    save ""
+  master.conf: |-
+    dir /data
+    rename-command FLUSHDB ""
+    rename-command FLUSHALL ""
+  replica.conf: |-
+    dir /data
+    slave-read-only yes
+    rename-command FLUSHDB ""
+    rename-command FLUSHALL ""
 ---
